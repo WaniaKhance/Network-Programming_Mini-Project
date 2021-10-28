@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -54,9 +53,13 @@ public class Server {
 
 			JSONObject obj = new JSONObject();
 
-			final Headers headers = t.getResponseHeaders();
-
-			headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
+            t.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+			t.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+			t.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+            
+        	final Headers headers = t.getResponseHeaders();
+        	
+            headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
 			Map<String, String> parms = Server.queryToMap(t.getRequestURI().getQuery());
 			String par = parms.get("id");
 			id = parseID(par);
@@ -76,11 +79,8 @@ public class Server {
 			Vector<Byte> vect1, vect2 = new Vector<Byte>();
 			vect1 = id;
 			System.out.println("This the id s");
-			int idd[] = new int[id.size()];
-			for (int i = 0; i < vect1.size(); i++) {
-				System.out.println(vect1.get(i));
-				idd[i] = vect1.get(i);
-			}
+
+
 			ArrayList<Vector<Byte>> chunck = new ArrayList<Vector<Byte>>();
 			chunck = ServerThread.getChunk();
 			int size;
@@ -89,13 +89,9 @@ public class Server {
 				int sum = 0;
 				vect2 = chunck.get(i);
 				int k = 0;
-				for (int j = 0; j < vect2.size(); j++) {
-					sum = sum + (vect1.get(k) * vect2.get(j));
-					// System.out.println("Id: " + vect1.get(k).intValue() + "---Data:
-					// "+vect2.get(j) + " --- Sum: "+ sum);
-					k++;
-					if (k == 1000)
-						k = 0;
+				for (int j = 0; j < 1000 && j < vect2.size(); j++) {
+					sum = sum + (vect1.get(j) * vect2.get(j));
+					System.out.println("ID: " + vect1.get(j) + " --- Data: " + vect2.get(j) + " --- Sum: " + sum);
 				}
 				x[i] = sum;
 			}
@@ -131,8 +127,9 @@ public class Server {
 					} else {
 						ch = Integer.parseInt(String.valueOf(characters[i]));
 					}
+					data.add((byte) (ch));
 				}
-				data.add((byte) (ch));
+				
 			}
 			return data;
 		}

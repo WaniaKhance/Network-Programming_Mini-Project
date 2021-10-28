@@ -30,19 +30,30 @@ public class PublisherPage {
     	public MyHandler() {
     	}
         @Override
-        public void handle(HttpExchange t) throws IOException {
+public void handle(HttpExchange t) throws IOException {
         	
         	id = vector_ID;
         	JSONObject obj = new JSONObject();
             obj.put("id", id);
             
         	final Headers headers = t.getResponseHeaders();
+
+            headers.add("Access-Control-Allow-Origin", "*");
+
+            headers.add("Access-Control-Allow-Methods", "GET, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
+            if (t.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                t.sendResponseHeaders(204, -1);
+                return;
+            }
+
         	final String responseBody = obj.toString();
             headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
             final byte[] rawResponseBody = responseBody.getBytes(CHARSET);
             t.sendResponseHeaders(STATUS_OK, rawResponseBody.length);
             t.getResponseBody().write(rawResponseBody);
-        } 
+        }
     }
     
  public void setID(Vector<Byte> id) {
